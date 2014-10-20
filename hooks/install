@@ -48,7 +48,7 @@ else
 fi
 
 tar -xzf ${TARGET_LOGSTASH_ARCHIVE} -C ${WORKDIR}
-ln -s ${WORKDIR}/logstash-${VERSION} ${BASEPATH}
+mv ${WORKDIR}/logstash-${VERSION} ${BASEPATH}
 
 juju-log "create skeleton dir"
 mkdir -p ${BASEPATH}/bin
