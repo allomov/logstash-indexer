@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set -eux # -x for verbose logging to juju debug-log
+HOME=`dirname $0`
+. $HOME/common.sh
+
+juju-log "logstash_agent - Relationship Advice -> $JUJU_REMOTE_UNIT"
+juju-log Relation settings:
+relation-get
+juju-log Relation members:
+relation-list
+
+RABBIT_HOST=$(relation-get private-address)
+RABBIT_PASS=$(relation-get password)
+
+if [[ -z $RABBIT_HOST ]] || [[ -z $RABBIT_PASS ]] ; then
+  juju-log "logstash_agent - amqp_changed: rabbit_host||rabbit_password not set."
+  exit 0
+fi
+
+
+clustered=$(relation-get clustered)
+if [[ -n "$clustered" ]] ; then
+  juju-log "logstash_agent - ampq_changed: Configuring for access to haclustered rabbitmq service."
+  RABBIT_VIP=$(relation-get vip)
+  [[ -z "$vip" ]] && juju-log "logstash_agent - amqp_changed: Clustered but no vip." && exit 0
+  RABBIT_HOST="$RABBIT_VIP"
+fi
+
+
+cat > ${BASEPATH}/conf.d/input_rabbit.conf << EOF
+input {
+  rabbitmq {
+    exchange      => "logstash"
+    host          => "${RABBIT_HOST}"
+    user          => "${RABBIT_USER}"
+    password      => "${RABBIT_PASS}"
+    vhost         => "${RABBIT_VHOST}"
+  }
+}
+EOF
+
+[ "$(initctl status logstash-indexer | grep running)" ] && initctl restart logstash-indexer || initctl start logstash-indexer

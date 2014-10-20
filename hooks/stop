@@ -1,0 +1,10 @@
+#!/bin/bash
+
+HOME=`dirname $0`
+. $HOME/common.sh
+
+juju-log "stopping logstash...  with feeling."
+service redis-server stop
+initctl stop logstash-indexer
+#close-port 9200/tcp
+#close-port 6379/TCP

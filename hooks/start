@@ -1,0 +1,11 @@
+#!/bin/bash
+
+HOME=`dirname $0`
+. $HOME/common.sh
+
+juju-log "run logstash"
+service redis-server status && service redis-server restart || service redis-server start
+initctl start logstash-indexer
+#open-port 9200/tcp
+#open-port 6379/TCP
+juju-log "started?"

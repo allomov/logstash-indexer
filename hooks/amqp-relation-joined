@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -eux # -x for verbose logging to juju debug-log
+HOME=`dirname $0`
+. $HOME/common.sh
+
+relation-set username=${RABBIT_USER}
+relation-set vhost=${RABBIT_VHOST}
+
+juju-log "logstash-indexer - amqp_joined: requesting credentials for $RABBIT_USER"

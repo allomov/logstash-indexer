@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -eux # -x for verbose logging to juju debug-log
+
+[ -z "$(relation-get cluster-name)" ] && exit 0
+[ -z "$(relation-get host)" ] && exit 0
+
+HOME=`dirname $0`
+. ${HOME}/common.sh
+
+juju-log "Relationship Advice - $JUJU_REMOTE_UNIT"
+juju-log Relation settings:
+relation-get
+juju-log Relation members:
+relation-list
+
+CLUSTER_NAME=`relation-get cluster-name`
+ES_HOST=`relation-get host`
+
+juju-log "change output to push to elasticsearch cluster ${CLUSTER_NAME}"
+# host setting should ensure this works even when multicast discovery is broken
+echo "output {  elasticsearch {  cluster=> \"${CLUSTER_NAME}\"  host=>\"${ES_HOST}\"    } }" > ${BASEPATH}/conf.d/output-elasticsearch.conf
+
+initctl restart logstash-indexer

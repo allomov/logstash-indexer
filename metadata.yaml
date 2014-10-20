@@ -1,0 +1,19 @@
+name: logstash-indexer
+summary: "Logstash indexer server"
+maintainer: "Paul Cz <paul@paulcz.net>"
+description: |
+  Installs the logstash indexer.   Initially stand alone version,  
+  but would like to add charms and hooks for ElasticSearch, 
+  Kibana, and other stuffs.
+categories:
+  - applications
+requires:
+  cluster:
+    interface: elasticsearch
+  amqp:
+    interface: rabbitmq    
+provides:
+  input:
+    interface: redis
+  rest:
+    interface: elasticsearch
