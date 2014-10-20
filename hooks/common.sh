@@ -5,7 +5,7 @@
 # Set CONFIG constants
 VERSION="1.4.2"
 BASEURL="https://download.elasticsearch.org/logstash/logstash"
-CHECKSUM="863272192b52bccf1fc2cf839a888eaf"
+# CHECKSUM="863272192b52bccf1fc2cf839a888eaf"
 WORKDIR="/opt"
 BASEPATH="/opt/logstash"
 USER="logstash"
