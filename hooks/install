@@ -41,7 +41,7 @@ TARGET_LOGSTASH_ARCHIVE=${WORKDIR}/${LOGSTASH_ARCHIVE_NAME}
 
 if [ -f ${LOCAL_LOGSTASH_ARCHIVE} ]
 then
-  install -o root -g root -m 0644 ${LOCAL_LOGSTASH_ARCHIVE} ${BASEPATH}
+  install -o root -g root -m 0644 ${LOCAL_LOGSTASH_ARCHIVE} ${TARGET_LOGSTASH_ARCHIVE}
 else
   # Download logstash monolithic jar and checksum
   wget -q -O ${TARGET_LOGSTASH_ARCHIVE} ${BASEURL}/${LOGSTASH_ARCHIVE_NAME}
