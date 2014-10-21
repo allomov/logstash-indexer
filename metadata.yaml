@@ -12,8 +12,8 @@ requires:
     interface: elasticsearch
   amqp:
     interface: rabbitmq    
-provides:
   input:
     interface: redis
+provides:
   rest:
     interface: elasticsearch

@@ -18,19 +18,6 @@ juju-log "create logstash user"
 juju-log "install logstash and create config files"
 
 
-# Check if a local copy of the jar exists
-# if [ -f ${HOME}/../files/charm/logstash-${VERSION}-flatjar.jar ]
-# then
-#   install -o root -g root -m 0644 ${HOME}/../files/charm/logstash-${VERSION}-flatjar.jar ${BASEPATH}/bin/logstash.jar
-# else
-#   # Download logstash monolithic jar and checksum
-#   wget -q -O ${BASEPATH}/bin/logstash.jar ${BASEURL}/logstash-${VERSION}-flatjar.jar
-#   if [[ $(md5sum "${BASEPATH}/bin/logstash.jar" | cut -d " " -f 1) != ${CHECKSUM} ]]; then
-#     juju-log --log-level CRITICAL "Checksum of ${BASEPATH}/bin/logstash.jar failed"
-#     exit 1
-#   fi
-# fi
-
 LOGSTASH_ARCHIVE_NAME=logstash-${VERSION}.tar.gz
 LOCAL_LOGSTASH_ARCHIVE=${HOME}/../files/charm/${LOGSTASH_ARCHIVE_NAME}
 TARGET_LOGSTASH_ARCHIVE=${WORKDIR}/${LOGSTASH_ARCHIVE_NAME}
@@ -41,25 +28,24 @@ then
 else
   # Download logstash monolithic jar and checksum
   wget -q -O ${TARGET_LOGSTASH_ARCHIVE} ${BASEURL}/${LOGSTASH_ARCHIVE_NAME}
-  # if [[ $(md5sum "${BASEPATH}/bin/logstash.jar" | cut -d " " -f 1) != ${CHECKSUM} ]]; then
-  #   juju-log --log-level CRITICAL "Checksum of ${BASEPATH}/bin/logstash.jar failed"
-  #   exit 1
-  # fi
+  if [[ $(md5sum "${TARGET_LOGSTASH_ARCHIVE}" | cut -d " " -f 1) != ${CHECKSUM} ]]; then
+    juju-log --log-level CRITICAL "Checksum of ${TARGET_LOGSTASH_ARCHIVE} failed"
+    exit 1
+  fi
 fi
 
 tar -xzf ${TARGET_LOGSTASH_ARCHIVE} -C ${WORKDIR}
-ln -s ${WORKDIR}/logstash-${VERSION} ${BASEPATH}
+mv ${WORKDIR}/logstash-${VERSION} ${BASEPATH}
 
 juju-log "create skeleton dir"
 mkdir -p ${BASEPATH}/bin
-mkdir -p ${BASEPATH}/conf.d
+mkdir -p ${CONFIG_DIR}
 mkdir -p ${BASEPATH}/data
 
 echo "input {  file {     type => 'syslog'    path => ['/var/log/syslog','/var/log/kern.log','/var/log/auth.log','/var/log/dpkg.log'] sincedb_path => '${BASEPATH}' } }" > ${BASEPATH}/conf.d/input-file-syslog.conf
-echo 'input { redis { host => "127.0.0.1" data_type => "list" type => "redis" tags => ["redis"] key => "logstash" message_format => "json_event" } } ' > ${BASEPATH}/conf.d/input-redis.conf
-echo 'output {  elasticsearch {    embedded => true  } }' > ${BASEPATH}/conf.d/output-elasticsearch.conf
+echo 'output {  elasticsearch {    embedded => true  } }' > ${CONFIG_DIR}/output-elasticsearch.conf
 
-install -o root -g root -m 0644 ${HOME}/../files/charm/50-filters.conf ${BASEPATH}/conf.d/50-filters.conf
+install -o root -g root -m 0644 ${HOME}/../files/charm/50-filters.conf ${CONFIG_DIR}/50-filters.conf
 
 juju-log "create log file and pwn it"
 touch /var/log/logstash-indexer.log

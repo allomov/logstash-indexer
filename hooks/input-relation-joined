@@ -6,4 +6,7 @@ juju-log $JUJU_REMOTE_UNIT joined
 HOME=`dirname $0`
 . ${HOME}/common.sh
 
-relation-set host=${HOST}
+# relation-set host=${HOST}
+REDIS_HOST=${relation-get private-address}
+sed -i "s|REDIS_HOST|${REDIS_HOST}|g" ${CONFIG_DIR}/conf.d/input-redis.conf
+echo 'input { redis { host => "127.0.0.1" data_type => "list" type => "redis" tags => ["redis"] key => "logstash" message_format => "json_event" } } ' > ${BASEPATH}/conf.d/input-redis.conf
